@@ -133,7 +133,7 @@ input, select { font: inherit; color: var(--text); }
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  padding: var(--pad) var(--pad) calc(var(--nav-h) + 28px);
+  padding: var(--pad) var(--pad) calc(var(--nav-h) + 28px + env(safe-area-inset-bottom));
 }
 
 /* views */
@@ -158,6 +158,10 @@ input, select { font: inherit; color: var(--text); }
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border-top: 1px solid var(--border);
+  /* iOS Safari fix: force hardware compositing so nav stays fixed */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
 }
 .nav-btn {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
@@ -195,7 +199,8 @@ input, select { font: inherit; color: var(--text); }
   padding: var(--pad);
   box-shadow: var(--shadow);
 }
-.panel + .panel, .stack > * + * { margin-top: 16px; }
+.panel + .panel, .stack > * + * { margin-top: 20px; }
+.stat-tiles + .panel, .stat-tiles + * { margin-top: 20px; }
 
 .grid { display: grid; gap: 16px; }
 @media (min-width: 720px) {
