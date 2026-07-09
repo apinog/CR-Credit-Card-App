@@ -51,7 +51,7 @@ CRW.ui.dashboard = (() => {
       ),
 
       // Quick recommendation
-      el("div", { class: "panel" },
+      el("div", { class: "panel", style: "margin-top:20px" },
         el("h2", {}, "Quick recommendation"),
         el("div", { class: "reco-row" },
           bestRewards ? miniCardEl(bestRewards.card) : null,
