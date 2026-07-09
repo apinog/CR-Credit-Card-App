@@ -1,21 +1,6 @@
 /**
  * cards.data.js — Your wallet, as configuration.
- *
- * To replace a card (e.g. swap Promerica Premia Travel for a new card):
- *   1. Copy an existing card object.
- *   2. Change id, name, issuer, network, art, fees and rewards.
- *   3. Set `active: false` on the old card (kept for history) or delete it.
- *
- * IMPORTANT — every reward rate below is a PLACEHOLDER ESTIMATE
- * (estimate: true). Verify each one against your statement / issuer T&Cs
- * and flip `estimate` to false once confirmed. The UI surfaces this flag.
- *
- * Reward model:
- *   rewards.baseRate            — value earned per unit spent, in rewardCurrency
- *   rewards.categoryRates{}     — overrides by merchant category id
- *   rewards.pointValueUSD       — estimated USD value of 1 point/mile (points cards)
- *   For cashback cards, rates are fractions (0.01 = 1%).
- *   For points cards, rates are points per USD spent.
+ * Sources: BAC website + Promerica website + verified by Alberto July 2026.
  */
 window.CRW_DATA = window.CRW_DATA || {};
 
@@ -28,37 +13,43 @@ window.CRW_DATA.cards = [
     issuer: "BAC Credomatic",
     network: "amex",
     productUrl: "https://www.baccredomatic.com/es-cr/personas/tarjetas/destacadas/blue-american-expressr/american-express/blue",
-    art: {
-      // Placeholder gradient art. To use official imagery, drop a PNG in
-      // assets/cards/ and set { type: "image", src: "assets/cards/blue.png" }.
-      type: "gradient",
-      from: "#1f4e9c",
-      to: "#4fa3e0",
-      accent: "rgba(255,255,255,.22)"
-    },
+    art: { type: "gradient", from: "#1f4e9c", to: "#4fa3e0", accent: "rgba(255,255,255,.22)" },
     fees: {
       annualFeeUSD: 0,
-      annualFeeNote: "Estimate — confirm current fee/waiver policy with BAC.",
+      annualFeeNote: "No annual fee per BAC website.",
       foreignTxFeePct: 0,
       foreignTxNote: "Amex-network CRC/USD dual billing; verify FX markup."
     },
     rewards: {
       type: "cashback",
       rewardCurrency: "USD",
-      program: "BAC cashback",
+      program: "BAC CashBack Blue",
       baseRate: 0.01,
-      categoryRates: {},
-      capsNote: "Check monthly/annual cashback caps in BAC T&Cs.",
-      estimate: true
+      categoryRates: {
+        // 5% — verified July 2026 (BAC/Amex Blue product page)
+        international: 0.05,
+        streaming:     0.05,
+        airline:       0.05,
+        hotel:         0.05,
+        travel:        0.05,
+        // 1% — verified July 2026
+        fast_food:     0.01,
+        restaurant:    0.01,
+        entertainment: 0.01,
+        supermarket:   0.01,
+        grocery:       0.01,
+        pet:           0.01
+      },
+      capsNote: "Verify monthly/annual cashback cap in BAC Reglamento Plan de Lealtad CashBack Blue.",
+      estimate: false
     },
     benefits: [
-      "Amex Offers (when available in CR)",
-      "Purchase protection (verify coverage terms)",
-      "0 km / roadside perks vary by BAC promotion"
+      "5% cashback: international purchases, streaming, apps, airlines, hotels, travel agencies, car rentals",
+      "1% cashback: fast food, restaurants, entertainment, supermarkets, grocery, veterinary"
     ],
-    insurance: ["Basic purchase protection (verify)"],
+    insurance: ["Purchase protection (verify)"],
     loungeAccess: false,
-    notes: "General-purpose Amex. Strong online + large-retail acceptance; carry a Visa/MC backup for small merchants."
+    notes: "Best card for all online/international spending, subscriptions, and travel bookings. Use EconoMía for local supermarkets and restaurants."
   },
 
   {
@@ -72,30 +63,38 @@ window.CRW_DATA.cards = [
     art: { type: "gradient", from: "#0e7a5f", to: "#3ecf9a", accent: "rgba(255,255,255,.20)" },
     fees: {
       annualFeeUSD: 0,
-      annualFeeNote: "Estimate — confirm current fee/waiver policy with BAC.",
+      annualFeeNote: "No annual fee per BAC website.",
       foreignTxFeePct: 0,
       foreignTxNote: "Verify FX markup on non-CRC transactions."
     },
     rewards: {
       type: "cashback",
       rewardCurrency: "USD",
-      program: "EconoMía everyday cashback",
+      program: "EconoMía CashBack",
       baseRate: 0.01,
       categoryRates: {
-        supermarket: 0.04,
-        pharmacy: 0.04,
-        gas: 0.04
+        // 4% — verified July 2026 (BAC EconoMía product page)
+        supermarket:  0.04,
+        grocery:      0.04,
+        pharmacy:     0.04,
+        healthcare:   0.04,
+        // 2% — verified July 2026
+        restaurant:   0.02,
+        fast_food:    0.02,
+        pet:          0.02
       },
-      capsNote: "EconoMía category cashback typically capped monthly — verify exact cap and eligible MCCs.",
-      estimate: true
+      capsNote: "Monthly cap: 22,000 CRC (~$44). Annual cap: 264,000 CRC (~$523). Min redemption: 15,000 CRC. Points expire every 2 rolling years.",
+      estimate: false
     },
     benefits: [
-      "Elevated cashback on everyday essentials (supermarket / pharmacy / fuel)",
-      "Amex Offers (when available in CR)"
+      "4% cashback: supermarkets, mini-marts, corner stores",
+      "4% cashback: pharmacies, clinics, hospitals, labs",
+      "2% cashback: restaurants, fast food",
+      "2% cashback: veterinary and pet supply stores"
     ],
     insurance: ["Basic purchase protection (verify)"],
     loungeAccess: false,
-    notes: "Your everyday-essentials workhorse. Pair with a high-acceptance backup where Amex is weak."
+    notes: "Everyday workhorse. Best for Automercado, Walmart, Fischel, and local restaurants. Monthly cap ~₡600k spend before hitting ceiling."
   },
 
   {
@@ -109,30 +108,42 @@ window.CRW_DATA.cards = [
     art: { type: "gradient", from: "#5a2d82", to: "#9d5bd2", accent: "rgba(255,255,255,.18)" },
     fees: {
       annualFeeUSD: 0,
-      annualFeeNote: "Estimate — confirm fee and waiver conditions with Promerica.",
+      annualFeeNote: "Verify current annual fee with Promerica.",
       foreignTxFeePct: 0,
-      foreignTxNote: "Verify FX markup."
+      foreignTxNote: "Verify FX markup on international transactions."
     },
     rewards: {
       type: "points",
-      rewardCurrency: "Premia points",
-      program: "Premia",
-      baseRate: 1.0,           // points per USD spent — PLACEHOLDER
+      rewardCurrency: "Premia miles",
+      program: "Premia Travel",
+      // Standard earn per $1 USD spent
+      baseRate: 1.0,
       categoryRates: {
-        airline: 2.0,
-        hotel: 2.0,
-        travel: 2.0
+        // 3 miles/$1 — standard travel categories + gas (custom rate confirmed by Alberto)
+        gas:       3.0,
+        airline:   3.0,
+        hotel:     3.0,
+        travel:    3.0,
+        // 2 miles/$1 — international purchases
+        international: 2.0,
+        // 1 mile/$1
+        restaurant:  1.0,
+        supermarket: 1.0,
+        pharmacy:    1.0
       },
-      pointValueUSD: 0.01,     // PLACEHOLDER redemption value — verify
-      capsNote: "Verify Premia earn rate, travel multipliers, and expiration.",
-      estimate: true
+      // ~$0.01/mile is typical for Premia redemptions — ESTIMATE, verify with Promerica
+      pointValueUSD: 0.01,
+      capsNote: "Verify Premia miles expiration and redemption value with Promerica.",
+      estimate: true  // point value is estimate; earn rates are confirmed
     },
     benefits: [
-      "Travel-oriented earn on airlines / hotels",
-      "Near-universal acceptance (Visa)"
+      "3 miles/$1: gas stations (custom rate), airlines, hotels, car rentals, travel agencies, cruises",
+      "2 miles/$1: international purchases",
+      "1 mile/$1: restaurants, supermarkets, gas stations, pharmacies",
+      "Near-universal Visa acceptance"
     ],
     insurance: ["Travel insurance when tickets purchased with card (verify tier)"],
     loungeAccess: false,
-    notes: "Planned for replacement — kept as the high-acceptance backup. Swap by editing this file only."
+    notes: "Best for gas and any travel bookings. Primary Visa/Mastercard fallback where Amex isn't accepted. Note: Promerica may be migrating gas earn to the standard 3-mile travel tier — verify if earn rate changes."
   }
 ];
