@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Pura Wallet — CR Card Optimizer</title>
+  <meta name="description" content="Costa Rica credit card rewards optimizer and Amex acceptance assistant." />
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0c1116" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Pura Wallet" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+  <link rel="icon" type="image/png" href="assets/icons/icon-192.png" />
+
+  <!-- Fonts (graceful system fallback offline) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="shell">
+
+    <!-- Mobile top bar -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">₡</div>
+        <div>
+          <h1>Pura Wallet</h1>
+          <div class="tag">CR Card Optimizer</div>
+        </div>
+      </div>
+      <div class="topbar-spacer"></div>
+      <button class="icon-btn" id="theme-toggle" aria-label="Toggle dark / light theme">🌙</button>
+    </header>
+
+    <!-- Navigation: bottom tabs (mobile) / sidebar (desktop) -->
+    <nav class="nav" aria-label="Main">
+      <div class="nav-brand">
+        <div class="brand-mark">₡</div>
+        <div>
+          <h1 style="font-size:1rem">Pura Wallet</h1>
+          <div class="tag" style="font-size:.62rem;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase">CR Card Optimizer</div>
+        </div>
+      </div>
+      <button class="nav-btn" data-view="dashboard"><span class="ic">◈</span>Dashboard</button>
+      <button class="nav-btn" data-view="cards"><span class="ic">▤</span>My Cards</button>
+      <button class="nav-btn" data-view="optimizer"><span class="ic">⚖</span>Optimizer</button>
+      <button class="nav-btn" data-view="map"><span class="ic">◉</span>Amex Map</button>
+      <button class="nav-btn" data-view="more"><span class="ic">⋯</span>More</button>
+      <div class="nav-foot">
+        <button class="icon-btn" id="theme-toggle-desktop" aria-label="Toggle dark / light theme">🌙</button>
+      </div>
+    </nav>
+
+    <main class="main">
+      <section class="view" id="view-dashboard" aria-label="Dashboard"></section>
+      <section class="view" id="view-cards" aria-label="My cards"></section>
+      <section class="view" id="view-optimizer" aria-label="Transaction optimizer"></section>
+      <section class="view" id="view-map" aria-label="Amex acceptance map"></section>
+      <section class="view" id="view-more" aria-label="More features"></section>
+    </main>
+  </div>
+
+  <!-- Province detail panel + backdrop (used by the map view) -->
+  <div class="panel-backdrop" id="panel-backdrop"></div>
+
+  <!-- Data (JS config modules so the app runs from file:// too) -->
+  <script src="data/rewardRules.data.js"></script>
+  <script src="data/merchantCategories.data.js"></script>
+  <script src="data/cards.data.js"></script>
+  <script src="data/merchants.data.js"></script>
+  <script src="data/provinces.data.js"></script>
+  <script src="data/amexAcceptance.data.js"></script>
+  <script src="data/mapPaths.data.js"></script>
+
+  <!-- App -->
+  <script src="js/utils.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/engine/rewards.js"></script>
+  <script src="js/ui/dashboard.js"></script>
+  <script src="js/ui/cards.js"></script>
+  <script src="js/ui/optimizer.js"></script>
+  <script src="js/ui/map.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
