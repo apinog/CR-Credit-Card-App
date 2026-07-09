@@ -1,12 +1,11 @@
 /**
- * ui/dashboard.js — landing view: portfolio stats, quick reco, recent calcs.
+ * ui/dashboard.js — Phase 2: live FX pill, CRC/USD toggle, real projections.
  */
 window.CRW = window.CRW || {};
-
 CRW.ui = CRW.ui || {};
 
 CRW.ui.dashboard = (() => {
-  const { el, fmtUSD, esc } = CRW.utils;
+  const { el, fmtUSD, fmtCRC, esc, fxPill } = CRW.utils;
 
   function miniCardEl(card) {
     const d = el("div", { class: "mini-card" });
@@ -19,24 +18,44 @@ CRW.ui.dashboard = (() => {
     const E = CRW.engine;
     const cards = E.activeCards();
     const monthly = CRW.state.get("monthlySpendUSD");
+    const mode = CRW.state.get("displayMode") || "USD";
     const proj = E.yearlyProjection(monthly);
     const bestRewards = proj[0];
     const bestAcc = E.bestAcceptanceCard();
     const recents = CRW.state.get("recentCalcs");
 
+    const bestVal = mode === "CRC"
+      ? fmtCRC(bestRewards?.valueCRC || 0)
+      : fmtUSD(bestRewards?.valueUSD || 0, 0);
+
+    // Currency toggle for dashboard
+    const toggleWrap = el("div", { class: "currency-toggle", style: "margin-bottom:4px" });
+    const usdBtn = el("button", { class: "toggle-btn" + (mode === "USD" ? " active" : ""), onclick: () => switchMode("USD") }, "$ USD");
+    const crcBtn = el("button", { class: "toggle-btn" + (mode === "CRC" ? " active" : ""), onclick: () => switchMode("CRC") }, "₡ CRC");
+    toggleWrap.append(usdBtn, crcBtn);
+
+    function switchMode(m) {
+      CRW.state.set("displayMode", m);
+      CRW.router.go("dashboard");
+    }
+
     root.append(
       el("div", { class: "view-head" },
         el("div", { class: "eyebrow" }, "Dashboard"),
         el("h1", {}, "Your wallet at a glance"),
-        el("p", { class: "sub" }, `${cards.length} active cards · assumptions editable in data/`)
+        el("div", { class: "dash-head-row" },
+          el("p", { class: "sub" }, `${cards.length} active cards`),
+          toggleWrap
+        )
       ),
 
       // Stat tiles
       el("div", { class: "stat-tiles" },
         el("div", { class: "tile hero" },
           el("div", { class: "t-label" }, "Est. yearly rewards"),
-          el("div", { class: "t-value" }, fmtUSD(bestRewards?.valueUSD || 0, 0)),
-          el("div", { class: "t-sub" }, `if all spend (${fmtUSD(monthly, 0)}/mo) went on ${bestRewards?.card.name || "—"} at base rate — category-mix model in Phase 2`)
+          el("div", { class: "t-value" }, bestVal),
+          el("div", { class: "t-sub" },
+            `if ${fmtUSD(monthly, 0)}/mo went on ${bestRewards?.card.name || "—"} at base rate`)
         ),
         el("div", { class: "tile" },
           el("div", { class: "t-label" }, "Cards owned"),
@@ -59,7 +78,10 @@ CRW.ui.dashboard = (() => {
             el("div", { class: "title" }, "Best for rewards"),
             el("div", { class: "desc" }, `${esc(bestRewards?.card.name || "—")} — highest projected value on your spend`)
           ),
-          el("div", { class: "val" }, `${fmtUSD(bestRewards?.valueUSD || 0, 0)}/yr`)
+          el("div", { class: "val" },
+            mode === "CRC"
+              ? fmtCRC(bestRewards?.valueCRC || 0) + "/yr"
+              : fmtUSD(bestRewards?.valueUSD || 0, 0) + "/yr")
         ),
         el("div", { class: "reco-row" },
           bestAcc ? miniCardEl(bestAcc.card) : null,
@@ -90,8 +112,11 @@ CRW.ui.dashboard = (() => {
             ))
       ),
 
-      el("p", { class: "faint", style: "margin-top:14px" },
-        "All reward rates are placeholder estimates until verified — see badges in My Cards. Acceptance figures are personal estimates, not official statistics.")
+      // FX pill at bottom
+      el("div", { class: "fx-row", style: "margin-top:16px" }, fxPill()),
+
+      el("p", { class: "faint", style: "margin-top:8px" },
+        "Acceptance figures are personal estimates, not official statistics.")
     );
   }
 

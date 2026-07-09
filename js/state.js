@@ -9,6 +9,7 @@ CRW.state = (() => {
   const KEY = "crw-state-v1";
   const defaults = {
     theme: "dark",
+    displayMode: "USD",        // "USD" | "CRC" — persisted across sessions
     recentCalcs: [],          // last N optimizer runs
     monthlySpendUSD: 1200     // editable assumption used by dashboard projections
   };

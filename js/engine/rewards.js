@@ -1,13 +1,6 @@
 /**
  * engine/rewards.js — pure business logic, zero DOM.
- *
- * Phase 1 implements:
- *   ratesFor(card, category)          → effective rate + source
- *   rewardFor(card, amountUSD, cat)   → reward + USD value
- *   acceptanceFor(card, ctx)          → estimated acceptance % + provenance
- *   optimize(txn)                     → ranked cards with expected value
- *
- * Phase 2 will add: promotions, cap enforcement, projections engine.
+ * Phase 2: live FX, CRC/USD display mode, Premia miles in CRC, projections.
  */
 window.CRW = window.CRW || {};
 
@@ -17,44 +10,69 @@ CRW.engine = (() => {
 
   const activeCards = () => D().cards.filter((c) => c.active);
 
+  /** Current FX rate — live if available, fallback otherwise. */
+  const fxRate = () => CRW.fx?.rate() || rules().fx.crcPerUsd;
+
   /** Effective earn rate for a card in a category. */
   function rateFor(card, categoryId) {
     const r = card.rewards;
-    const override = r.categoryRates?.[categoryId];
+    const override = categoryId ? r.categoryRates?.[categoryId] : null;
     return {
       rate: override ?? r.baseRate,
       isCategoryBonus: override != null
     };
   }
 
-  /** Reward earned for a USD amount. Returns display + USD value. */
-  function rewardFor(card, amountUSD, categoryId) {
+  /**
+   * Reward earned for a USD amount.
+   * displayMode: "USD" | "CRC"
+   * Returns { valueUSD, valueCRC, display, displayCRC, detail, rate, isCategoryBonus }
+   */
+  function rewardFor(card, amountUSD, categoryId, displayMode = "USD") {
     const r = card.rewards;
     const { rate, isCategoryBonus } = rateFor(card, categoryId);
+    const fx = fxRate();
+
     if (r.type === "cashback") {
       const usd = amountUSD * rate;
+      const crc = usd * fx;
       return {
         valueUSD: usd,
-        display: CRW.utils.fmtUSD(usd),
+        valueCRC: crc,
+        display: displayMode === "CRC" ? CRW.utils.fmtCRC(crc) : CRW.utils.fmtUSD(usd),
+        displayCRC: CRW.utils.fmtCRC(crc),
+        displayUSD: CRW.utils.fmtUSD(usd),
         detail: `${(rate * 100).toFixed(1).replace(/\.0$/, "")}% cashback`,
         rate, isCategoryBonus
       };
     }
-    // points
+
+    // Points/miles card (Promerica Premia)
+    // earn rate is points per USD; pointValueCRC is the verified CRC/point value
     const pts = amountUSD * rate;
-    const usd = pts * (r.pointValueUSD ?? 0.01);
+    const pointCRC = r.pointValueCRC || (r.pointValueUSD ? r.pointValueUSD * fx : 3);
+    const crc = pts * pointCRC;
+    const usd = crc / fx;
+
+    const ptsLabel = r.rewardCurrency === "Premia miles" ? "miles" : "pts";
+    const detail = `${rate}× ${r.rewardCurrency}`;
+
     return {
       valueUSD: usd,
-      display: `${Math.round(pts).toLocaleString()} pts`,
-      detail: `${rate}× ${r.rewardCurrency} · ≈ ${CRW.utils.fmtUSD(usd)}`,
+      valueCRC: crc,
+      display: displayMode === "CRC"
+        ? `${Math.round(pts).toLocaleString()} ${ptsLabel} ≈ ${CRW.utils.fmtCRC(crc)}`
+        : `${Math.round(pts).toLocaleString()} ${ptsLabel} ≈ ${CRW.utils.fmtUSD(usd)}`,
+      displayCRC: `${Math.round(pts).toLocaleString()} ${ptsLabel} ≈ ${CRW.utils.fmtCRC(crc)}`,
+      displayUSD: `${Math.round(pts).toLocaleString()} ${ptsLabel} ≈ ${CRW.utils.fmtUSD(usd)}`,
+      detail,
       rate, isCategoryBonus
     };
   }
 
   /**
-   * Estimated acceptance probability (0–100) for a card given context:
-   * { provinceId?, categoryId?, merchantId? }
-   * Priority: merchant override → province+category → province overall → national default.
+   * Estimated acceptance probability (0–100) for a card.
+   * ctx: { provinceId?, categoryId?, merchantId? }
    */
   function acceptanceFor(card, ctx = {}) {
     if (card.network !== "amex") {
@@ -76,7 +94,6 @@ CRW.engine = (() => {
         return { pct: p.overall, source: "province", confidence: p.confidence };
       }
     }
-    // national fallback: average of province overalls
     const vals = Object.values(acc.provinces).map((p) => p.overall);
     const avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
     return { pct: avg, source: "national-average", confidence: "low" };
@@ -84,18 +101,19 @@ CRW.engine = (() => {
 
   /**
    * Optimize a transaction.
-   * txn: { amount, currency, categoryId, provinceId?, merchantId? }
-   * Returns { results: [...ranked], best, warning }
+   * txn: { amount, currency, categoryId, provinceId?, merchantId?, displayMode? }
    */
   function optimize(txn) {
     const amountUSD = CRW.utils.toUSD(txn.amount, txn.currency);
+    const displayMode = txn.displayMode || CRW.state.get("displayMode") || "USD";
     const weight = rules().recommendation.useAcceptanceWeighting;
 
     const results = activeCards().map((card) => {
-      const reward = rewardFor(card, amountUSD, txn.categoryId);
+      const reward = rewardFor(card, amountUSD, txn.categoryId, displayMode);
       const acceptance = acceptanceFor(card, txn);
       const expectedUSD = weight ? reward.valueUSD * (acceptance.pct / 100) : reward.valueUSD;
-      return { card, reward, acceptance, expectedUSD, amountUSD };
+      const expectedCRC = expectedUSD * fxRate();
+      return { card, reward, acceptance, expectedUSD, expectedCRC, amountUSD };
     });
 
     results.sort((a, b) => b.expectedUSD - a.expectedUSD);
@@ -110,26 +128,37 @@ CRW.engine = (() => {
         backupCardId: backup?.card.id || null
       };
     }
-    return { results, best, warning, amountUSD };
+    return { results, best, warning, amountUSD, displayMode };
   }
 
   /**
-   * Very simple Phase 1 yearly projection: monthly spend × 12 at each card's
-   * base rate (category mix modeling arrives in Phase 2).
+   * Phase 2 yearly projection with category mix.
+   * spendProfile: { monthlySpendUSD, categoryMix: { categoryId: fraction } }
+   * If no mix provided, uses base rate across full spend.
    */
-  function yearlyProjection(monthlySpendUSD) {
+  function yearlyProjection(monthlySpendUSD, categoryMix = null) {
+    const annual = monthlySpendUSD * 12;
     return activeCards().map((card) => {
-      const r = rewardFor(card, monthlySpendUSD * 12, null);
-      return { card, valueUSD: r.valueUSD, display: r.display };
+      let valueUSD = 0;
+      if (categoryMix) {
+        for (const [catId, fraction] of Object.entries(categoryMix)) {
+          const r = rewardFor(card, annual * fraction, catId);
+          valueUSD += r.valueUSD;
+        }
+      } else {
+        valueUSD = rewardFor(card, annual, null).valueUSD;
+      }
+      const valueCRC = valueUSD * fxRate();
+      return { card, valueUSD, valueCRC };
     }).sort((a, b) => b.valueUSD - a.valueUSD);
   }
 
-  /** Card with the highest realistic acceptance nationwide. */
+  /** Card with highest realistic acceptance. */
   function bestAcceptanceCard() {
     return activeCards()
       .map((card) => ({ card, acc: acceptanceFor(card, {}) }))
       .sort((a, b) => b.acc.pct - a.acc.pct)[0];
   }
 
-  return { activeCards, rateFor, rewardFor, acceptanceFor, optimize, yearlyProjection, bestAcceptanceCard };
+  return { activeCards, fxRate, rateFor, rewardFor, acceptanceFor, optimize, yearlyProjection, bestAcceptanceCard };
 })();

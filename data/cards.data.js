@@ -131,10 +131,12 @@ window.CRW_DATA.cards = [
         supermarket: 1.0,
         pharmacy:    1.0
       },
-      // ~$0.01/mile is typical for Premia redemptions — ESTIMATE, verify with Promerica
-      pointValueUSD: 0.01,
-      capsNote: "Verify Premia miles expiration and redemption value with Promerica.",
-      estimate: true  // point value is estimate; earn rates are confirmed
+      // Verified by Alberto July 2026: 1 mile = ₡3 CRC (156.47 pts = ₡469.41 CRC)
+      // At ₡505/USD → 1 mile ≈ $0.00594. Update pointValueCRC if Promerica changes rate.
+      pointValueCRC: 3.0,
+      pointValueUSD: 0.00594,
+      capsNote: "Verify Premia miles expiration policy with Promerica.",
+      estimate: false
     },
     benefits: [
       "3 miles/$1: gas stations (custom rate), airlines, hotels, car rentals, travel agencies, cruises",

@@ -1,5 +1,5 @@
 /**
- * app.js — bootstrap: router, theme, PWA registration, "More" view.
+ * app.js — bootstrap: FX init, router, theme, PWA registration.
  */
 window.CRW = window.CRW || {};
 
@@ -28,20 +28,17 @@ window.CRW = window.CRW || {};
     }
   };
 
-  /* ---------- "More" (Phase 2/3 placeholders) ---------- */
+  /* ---------- "More" view ---------- */
   function renderMore(root) {
     root.innerHTML = "";
     const items = [
-      { ic: "📈", t: "Rewards Projection", d: "Weekly → annual projections with category spending mix and charts.", phase: "Phase 2" },
-      { ic: "🧭", t: "Merchant Explorer", d: "Browse merchants by province and category with acceptance and best-card guidance.", phase: "Phase 2" },
-      { ic: "⚔️", t: "Card Comparison", d: "Side-by-side scoring across rewards, fees, insurance, travel and acceptance.", phase: "Phase 2" },
       { ic: "📚", t: "Knowledge Base", d: "Searchable guide: reward rules, caps, expiration, BAC & Promerica specifics, Amex tips.", phase: "Phase 3" }
     ];
     root.append(
       el("div", { class: "view-head" },
-        el("div", { class: "eyebrow" }, "Roadmap"),
+        el("div", { class: "eyebrow" }, "More"),
         el("h1", {}, "More"),
-        el("p", { class: "sub" }, "Modules arriving in the next phases — the data layer already supports them.")),
+        el("p", { class: "sub" }, "Additional modules.")),
       el("div", { class: "grid cols-2" },
         items.map((i) =>
           el("div", { class: "coming" },
@@ -67,16 +64,18 @@ window.CRW = window.CRW || {};
   }
 
   /* ---------- Boot ---------- */
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
     applyTheme(CRW.state.get("theme") || "dark");
     $("#theme-toggle")?.addEventListener("click", toggleTheme);
     $("#theme-toggle-desktop")?.addEventListener("click", toggleTheme);
     $$(".nav-btn").forEach((b) => b.addEventListener("click", () => CRW.router.go(b.dataset.view)));
 
+    // Fetch live FX rate before first render (non-blocking — falls back gracefully)
+    await CRW.fx.init();
+
     const initial = (location.hash || "#dashboard").slice(1);
     CRW.router.go(initial);
 
-    // Service worker: only on http(s) — silently skipped when opened via file://
     if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
       navigator.serviceWorker.register("sw.js").catch(() => {});
     }

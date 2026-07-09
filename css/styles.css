@@ -430,3 +430,41 @@ input, select { font: inherit; color: var(--text); }
 .coming h3 { color: var(--text); margin-bottom: 6px; }
 .coming p { font-size: .86rem; max-width: 420px; margin: 0 auto; }
 .coming .phase { display: inline-block; margin-top: 14px; }
+
+/* ---------- Currency toggle ---------- */
+.currency-toggle {
+  display: inline-flex; border-radius: 10px; border: 1px solid var(--border);
+  overflow: hidden; background: var(--surface-2);
+}
+.toggle-btn {
+  padding: 5px 14px; font-size: .76rem; font-weight: 600;
+  color: var(--text-muted); border: none; background: none; cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.toggle-btn.active {
+  background: var(--emerald); color: #06231a;
+}
+
+/* ---------- FX pill ---------- */
+.fx-pill {
+  display: inline-block;
+  font-size: .7rem; color: var(--text-faint);
+  font-family: var(--font-data);
+  letter-spacing: .02em;
+  padding: 2px 0;
+}
+.fx-row { margin-top: 10px; }
+
+/* ---------- Results header row ---------- */
+.results-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin: 18px 0 12px; flex-wrap: wrap;
+}
+.results-header h2 { margin: 0; }
+
+/* ---------- Dashboard head row ---------- */
+.dash-head-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-top: 4px; flex-wrap: wrap;
+}
+.dash-head-row .sub { margin: 0; }
