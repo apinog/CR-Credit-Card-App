@@ -468,3 +468,94 @@ input, select { font: inherit; color: var(--text); }
   gap: 12px; margin-top: 4px; flex-wrap: wrap;
 }
 .dash-head-row .sub { margin: 0; }
+
+/* ---------- Merchant Explorer ---------- */
+.search-wrap { margin-bottom: 14px; }
+.search-input {
+  width: 100%; padding: 10px 14px; border-radius: var(--r-md);
+  border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text); font-size: .92rem; font-family: var(--font-body);
+}
+.search-input:focus { outline: none; border-color: var(--emerald); }
+
+.cat-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.cat-tab {
+  padding: 5px 13px; border-radius: 20px; font-size: .78rem; font-weight: 600;
+  border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text-muted); cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+}
+.cat-tab:hover { border-color: var(--emerald); color: var(--text); }
+.cat-tab.active { background: var(--emerald); color: #06231a; border-color: var(--emerald); }
+
+.merchant-list { display: grid; gap: 14px; }
+.merchant-card { }
+.merch-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 6px; }
+.merch-name { font-weight: 700; font-size: 1rem; }
+.merch-cat { font-size: .78rem; margin-top: 2px; }
+.merch-acc { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.merch-acc-pct { font-family: var(--font-data); font-size: .84rem; font-weight: 600; }
+.amex-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-bottom: 2px; }
+.merch-cards-list { display: flex; flex-direction: column; gap: 6px; }
+.merch-card-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 10px; border-radius: var(--r-sm);
+  background: var(--surface-2);
+}
+.merch-card-row.best-row { background: rgba(47,191,143,.10); border: 1px solid rgba(47,191,143,.25); }
+.merch-card-body { flex: 1; }
+.merch-card-name { font-size: .84rem; font-weight: 600; display: block; }
+.merch-card-rate { font-size: .75rem; }
+.merch-card-val { font-family: var(--font-data); font-size: .88rem; font-weight: 700; }
+.merch-card-val.emerald { color: var(--emerald); }
+.mini-card.sm { width: 32px; height: 22px; border-radius: 4px; flex-shrink: 0; }
+.mini-card.xs { width: 22px; height: 16px; border-radius: 3px; flex-shrink: 0; }
+.btn-ghost {
+  background: none; border: 1px solid var(--border); border-radius: var(--r-sm);
+  color: var(--text-muted); padding: 6px 14px; cursor: pointer; font-size: .82rem;
+  transition: border-color var(--t-fast), color var(--t-fast);
+}
+.btn-ghost:hover { border-color: var(--emerald); color: var(--emerald); }
+
+/* ---------- Card Comparison ---------- */
+.compare-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.compare-col { display: flex; flex-direction: column; gap: 12px; }
+.ccard.sm { height: 80px; border-radius: 10px; padding: 10px 12px; position: relative; }
+.ccard.sm .row { display: flex; justify-content: space-between; }
+.ccard.sm .chip.sm { width: 18px; height: 14px; border-radius: 3px; background: var(--chip-color, rgba(255,215,0,.7)); margin-top: 8px; }
+.compare-rank { text-align: center; }
+.rank-label { font-size: .75rem; color: var(--text-muted); display: block; }
+.overall-score { font-family: var(--font-data); font-size: 2.2rem; font-weight: 800; line-height: 1; }
+.compare-yearly { text-align: center; padding: 8px; background: var(--surface-2); border-radius: var(--r-sm); }
+.yearly-val { font-family: var(--font-data); font-size: 1.1rem; font-weight: 700; color: var(--emerald); }
+.dim-list { display: flex; flex-direction: column; gap: 8px; }
+.dim-row { }
+.dim-label { display: flex; justify-content: space-between; font-size: .76rem; margin-bottom: 4px; }
+.dim-weight { }
+.score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.score-bar-track { flex: 1; height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
+.score-bar-val { font-family: var(--font-data); font-size: .72rem; width: 24px; text-align: right; color: var(--text-muted); }
+
+/* Best for section */
+.best-for-list { display: flex; flex-direction: column; gap: 6px; }
+.best-for-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: var(--r-sm); background: var(--surface-2);
+}
+.bf-cat { flex: 1; font-size: .84rem; }
+.bf-card { flex: 1; font-size: .82rem; font-weight: 600; }
+.bf-val { font-family: var(--font-data); font-size: .86rem; font-weight: 700; }
+.bf-val.emerald { color: var(--emerald); }
+
+/* More tab live cards */
+.more-card { transition: border-color var(--t-fast); }
+.more-card:hover { border-color: var(--emerald); }
+.more-card .ph-ic { font-size: 1.8rem; margin-bottom: 8px; }
+.more-card h3 { color: var(--text); margin-bottom: 6px; }
+.more-card p { font-size: .84rem; color: var(--text-muted); }
+
+@media (min-width: 920px) {
+  .merchant-list { grid-template-columns: repeat(2, 1fr); }
+  .compare-grid { grid-template-columns: repeat(3, 1fr); }
+}

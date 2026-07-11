@@ -12,6 +12,8 @@ window.CRW = window.CRW || {};
     cards: () => CRW.ui.cards.render($("#view-cards")),
     optimizer: () => CRW.ui.optimizer.render($("#view-optimizer")),
     map: () => CRW.ui.map.render($("#view-map")),
+    merchants: () => CRW.ui.merchantExplorer.render($("#view-merchants")),
+    compare: () => CRW.ui.cardComparison.render($("#view-compare")),
     more: () => renderMore($("#view-more"))
   };
 
@@ -31,16 +33,28 @@ window.CRW = window.CRW || {};
   /* ---------- "More" view ---------- */
   function renderMore(root) {
     root.innerHTML = "";
-    const items = [
+    const live = [
+      { ic: "🧭", t: "Merchant Explorer", d: "Browse merchants by category — best card and Amex acceptance at a glance.", view: "merchants" },
+      { ic: "⚔️", t: "Card Comparison", d: "Side-by-side scoring across rewards, acceptance, categories and perks.", view: "compare" }
+    ];
+    const coming = [
       { ic: "📚", t: "Knowledge Base", d: "Searchable guide: reward rules, caps, expiration, BAC & Promerica specifics, Amex tips.", phase: "Phase 3" }
     ];
     root.append(
       el("div", { class: "view-head" },
         el("div", { class: "eyebrow" }, "More"),
         el("h1", {}, "More"),
-        el("p", { class: "sub" }, "Additional modules.")),
+        el("p", { class: "sub" }, "Additional tools for your wallet.")),
       el("div", { class: "grid cols-2" },
-        items.map((i) =>
+        live.map((i) =>
+          el("div", { class: "panel more-card", onclick: () => CRW.router.go(i.view), style: "cursor:pointer" },
+            el("div", { class: "ph-ic" }, i.ic),
+            el("h3", {}, i.t),
+            el("p", {}, i.d),
+            el("span", { class: "btn-ghost", style: "margin-top:12px;display:inline-block" }, "Open →")))),
+      el("h2", { style: "margin:24px 0 12px" }, "Coming soon"),
+      el("div", { class: "grid cols-2" },
+        coming.map((i) =>
           el("div", { class: "coming" },
             el("div", { class: "ph-ic" }, i.ic),
             el("h3", {}, i.t),
