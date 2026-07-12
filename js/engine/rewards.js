@@ -72,12 +72,29 @@ CRW.engine = (() => {
 
   /**
    * Estimated acceptance probability (0–100) for a card.
-   * ctx: { provinceId?, categoryId?, merchantId? }
+   * ctx: { provinceId?, categoryId?, merchantId?, channel?, geography? }
+   *   channel: "online" | "in-person"
+   *   geography: "local" | "us" | "international"
    */
   function acceptanceFor(card, ctx = {}) {
     if (card.network !== "amex") {
       return { pct: rules().recommendation.visaMastercardAcceptance, source: "network", confidence: "high" };
     }
+
+    // Online purchases: Amex acceptance is near-universal (major platforms all take it)
+    if (ctx.channel === "online") {
+      const pct = ctx.geography === "local" ? 95 : 99;
+      return { pct, source: "online-channel", confidence: "high" };
+    }
+
+    // Foreign in-person: US is excellent for Amex, other international also high
+    if (ctx.geography === "us") {
+      return { pct: 98, source: "us-market", confidence: "high" };
+    }
+    if (ctx.geography === "international") {
+      return { pct: 85, source: "international-estimate", confidence: "medium" };
+    }
+
     const acc = D().amexAcceptance;
 
     if (ctx.merchantId) {
@@ -108,9 +125,18 @@ CRW.engine = (() => {
     const displayMode = txn.displayMode || CRW.state.get("displayMode") || "USD";
     const weight = rules().recommendation.useAcceptanceWeighting;
 
+    // Resolve effective categoryId: international/US spend always gets "international" bonus on Blue
+    const effectiveCategoryId = (txn.geography === "us" || txn.geography === "international")
+      ? "international"
+      : txn.categoryId;
+
     const results = activeCards().map((card) => {
-      const reward = rewardFor(card, amountUSD, txn.categoryId, displayMode);
-      const acceptance = acceptanceFor(card, txn);
+      // Use international category for foreign spend to trigger Blue's 5%
+      const catId = (txn.geography === "us" || txn.geography === "international")
+        ? "international"
+        : txn.categoryId;
+      const reward = rewardFor(card, amountUSD, catId, displayMode);
+      const acceptance = acceptanceFor(card, { ...txn, categoryId: catId });
       const expectedUSD = weight ? reward.valueUSD * (acceptance.pct / 100) : reward.valueUSD;
       const expectedCRC = expectedUSD * fxRate();
       return { card, reward, acceptance, expectedUSD, expectedCRC, amountUSD };

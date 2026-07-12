@@ -17,16 +17,42 @@ window.CRW = window.CRW || {};
     more: () => renderMore($("#view-more"))
   };
 
+  // Sub-views that have a back button (not in bottom nav)
+  const subViews = new Set(["merchants", "compare"]);
+
   CRW.router = {
+    _prev: "dashboard",
     go(view) {
       if (!views[view]) view = "dashboard";
+      const prev = CRW.router._prev;
+      if (!subViews.has(view)) CRW.router._prev = view;
+
       $$(".view").forEach((v) => v.classList.remove("active"));
+      // Only highlight nav for top-level views
       $$(".nav-btn").forEach((b) => b.classList.toggle("active", b.dataset.view === view));
+
       views[view]();
-      $(`#view-${view}`).classList.add("active");
+
+      const viewEl = $(`#view-${view}`);
+      viewEl.classList.add("active");
+
+      // Scroll to top — use the view element itself for sub-views
+      viewEl.scrollTop = 0;
+      window.scrollTo({ top: 0, behavior: "instant" });
+
       if (location.hash !== "#" + view) history.replaceState(null, "", "#" + view);
-      window.scrollTo({ top: 0 });
       CRW.ui.map?.closePanel?.();
+
+      // Back button: show for sub-views
+      const backBtn = $("#back-btn");
+      if (backBtn) {
+        if (subViews.has(view)) {
+          backBtn.style.display = "";
+          backBtn.onclick = () => CRW.router.go(prev || "more");
+        } else {
+          backBtn.style.display = "none";
+        }
+      }
     }
   };
 

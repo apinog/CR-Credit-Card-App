@@ -34,6 +34,7 @@
           <div class="tag">CR Card Optimizer</div>
         </div>
       </div>
+      <button class="icon-btn" id="back-btn" aria-label="Go back" style="display:none">←</button>
       <div class="topbar-spacer"></div>
       <button class="icon-btn" id="theme-toggle" aria-label="Toggle dark / light theme">🌙</button>
     </header>
@@ -63,12 +64,12 @@
       <section class="view" id="view-optimizer" aria-label="Transaction optimizer"></section>
       <section class="view" id="view-map" aria-label="Amex acceptance map"></section>
       <section class="view" id="view-more" aria-label="More features"></section>
+      <section class="view" id="view-merchants" aria-label="Merchant explorer"></section>
+      <section class="view" id="view-compare" aria-label="Card comparison"></section>
     </main>
   </div>
 
   <!-- Province detail panel + backdrop (used by the map view) -->
-  <div id="view-merchants" class="view main" role="main"></div>
-  <div id="view-compare" class="view main" role="main"></div>
   <div class="panel-backdrop" id="panel-backdrop"></div>
 
   <!-- Data (JS config modules so the app runs from file:// too) -->
